@@ -1,4 +1,71 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.3
+~~~~~~~~~~~~~~~~~~~~~~
+
+* removed a newline when honeypot puts an alert out
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.2
+~~~~~~~~~~~~~~~~~~~~~~
+
+* quick fix to add a check for database file, if its not there it'll create it
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* changed time delay if intelligence feed is turned to ON
+* turned intelligence feed to OFF by default in the config
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 1.0
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added auto detection if artillery wasn't installed to kick off the setup.py script
+* fixed database creation error if directory wasn't already created during a fresh install
+* fixed an issue that would cause email_handler to throw an exceptions for mail() taking two arguments, needed to be changed to send_mail
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.9
+~~~~~~~~~~~~~~~~~~~~~~
+
+* removed smtp and merged into core
+* fixed duplicate mail() tag that was causing email alerts to not be sent
+* fixed a bug that would cause valid_ip() to throw an error due to library mismatch
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.8.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added a better init.d script for startup, now supports stop/start. Will need to run setup.py in order to get the new file, or copy src/startup_artillery to /etc/init.d/artillery
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.8
+~~~~~~~~~~~~~~~~~~~~~~
+
+* large amounts of refactoring and recoding (thanks to plentz)
+* added ftp brute force detection (thanks johns3ej)
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.4
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed issue with HONEYPOT_BAN being yes on occasions and ON on others.
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.3
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed a bug that caused a 100% cpu spike on SSH monitoring
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.2
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added detection for monitor_ssh in /var/log/faillog on debian
+* added better error handling within artillery.py in event of control-c or exceptions
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.7.1
 ~~~~~~~~~~~~~~~~~~~~~~
 

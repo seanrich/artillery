@@ -1,84 +1,103 @@
 #!/usr/bin/python
 #####################################################################
 #
-# Artillery v0.7.1
+#  Artillery v1.0
 #
 # Written by Dave Kennedy (ReL1K)
 #
 # Still a work in progress.
 #
 #####################################################################
-import time,sys,thread,os
+import time,sys,thread,os,subprocess
 
-# all modules are located within src/, core is reusable code
+# check if its installed
+if not os.path.isfile("/var/artillery/artillery.py"):
+    print "[*] Artillery is not installed, running setup.py.."
+    subprocess.Popen("python setup.py", shell=True).wait()
+    sys.exit()
 
-# import the core modules
 from src.core import *
+
+# create the database directories if they aren't there
+if not os.path.isdir("/var/artillery/database/"):
+        os.makedirs("/var/artillery/database/")
+if not os.path.isfile("/var/artillery/database/temp.database"):
+        filewrite = file("/var/artillery/database/temp.database", "w")
+        filewrite.write("")
+        filewrite.close()
 
 # let the logfile know artillery has started successfully
 write_log("Artillery has started successfully.")
-
-# check which OS we are running
-operating_system = check_os()
+if is_config_enabled("CONSOLE_LOGGING"):
+    print "Artillery has started successfully.\nConsole logging enabled.\n"
 
 # prep everything for artillery first run
 check_banlist_path()
 
-# update artillery
-auto_update = check_config("AUTO_UPDATE=")
-if auto_update.lower() == "on":
-        # start auto-updates if on
+try:
+    # update artillery
+    if is_config_enabled("AUTO_UPDATE"):
         thread.start_new_thread(update, ())
 
-# import base monitoring of fs
-monitor_check = check_config("MONITOR=")
-if monitor_check.lower() == "on":
-	from src.monitor import *
+    # import base monitoring of fs
+    if is_config_enabled("MONITOR"):
+        from src.monitor import *
 
-# port ranges to spawn
-port = check_config("PORTS=")
+    # port ranges to spawn
+    port = read_config("PORTS")
 
-# spawn honeypot
-import src.honeypot
+    # spawn honeypot
+    import src.honeypot
 
-# spawn ssh monitor
-ssh_monitor = check_config("SSH_BRUTE_MONITOR=")
-if ssh_monitor.lower() == "on":
-        # import the ssh monitor
+    # spawn ssh monitor
+    if is_config_enabled("SSH_BRUTE_MONITOR"):
         import src.ssh_monitor
 
-# start monitor engine
-import src.monitor
+    ftp_monitor = read_config("FTP_BRUTE_MONITOR")
+    if ftp_monitor.lower() == "on":
+        #imprt the ftp monitor
+        import src.ftp_monitor
 
-# check hardening
-import src.harden
+    # start monitor engine
+    import src.monitor
 
-# start the email handler
-import src.email_handler
+    # check hardening
+    import src.harden
 
-# if we are running posix then lets create a new iptables chain
-if operating_system == "posix":
+    # start the email handler
+    import src.email_handler
+
+    # if we are running posix then lets create a new iptables chain
+    if is_posix():
         time.sleep(2)
-        thread.start_new_thread(create_iptables, ())
+        thread.start_new_thread(create_iptables_subset, ())
 
-# start anti_dos
-if operating_system == "posix":
+        # start anti_dos
         import src.anti_dos
 
-# check to see if we are using the intelligence feed
-intelligence_feed = check_config("THREAT_INTELLIGENCE_FEED=").lower()
-if intelligence_feed == "on":
-	thread.start_new_thread(intelligence_update, ())
+    # check to see if we are using the intelligence feed
+    if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
+        thread.start_new_thread(intelligence_update, ())
 
-# check to see if we are a threat server or not
-threat_server_check = check_config("THREAT_SERVER=").lower()
-if threat_server_check == "on":
-	thread.start_new_thread(threat_server, ())
+    # check to see if we are a threat server or not
+    if is_config_enabled("THREAT_SERVER"):
+        thread.start_new_thread(threat_server, ())
 
-# let the program to continue to run
-while 1:
+    # let the program to continue to run
+    while 1:
         try:
-                time.sleep(100000)
+            time.sleep(100000)
         except KeyboardInterrupt:
-                print "\n[!] Exiting Artillery... hack the gibson.\n"
-                sys.exit()
+            print "\n[!] Exiting Artillery... hack the gibson.\n"
+            sys.exit()
+
+except sys.excepthook, e:
+    print "Excepthook exception: " + format(e)
+    pass
+
+except KeyboardInterrupt:
+    sys.exit()
+
+except Exception, e:
+    print "General exception: " + format(e)
+    sys.exit()
